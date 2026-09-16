@@ -1,8 +1,14 @@
 #include <Arduino.h>
 #include <BluetoothSerial.h>
+#include <ESP32Encoder.h>
 
 // ts is functionslop
 
+// TODO
+// add screen support
+// add potentiometer lowk
+
+ESP32Encoder enc;
 BluetoothSerial SerialBT;
 
 constexpr int BUTTON_COUNT = 4;
@@ -25,6 +31,8 @@ int ENC_SW = 27;
 int encCounter = 0;
 int clk;
 int prevClk;
+
+int64_t count = enc.getCount();
 
 enum LedStat {
   RED,
@@ -99,24 +107,11 @@ void setColorStatus() {
   }
 }
 
-String computeRotary() {
-  clk = digitalRead(CLK_PIN);
-  if (clk != prevClk && clk == 1) {
-    if (digitalRead(DT_PIN) != clk) {
-      encCounter--;
-    } else {
-      encCounter++;
-    }
-  }
-  prevClk = clk;
-  return String(encCounter);
-}
-
 String lastConcatString = "";
 
 String concatenateStrings() {
   String out = "";
-  out = getActiveButtons() + computeRotary();
+  out = getActiveButtons() + String(count);
   return out;
 }
 
@@ -128,10 +123,10 @@ void setup() {
     pinMode(BUTTON_PINS[i], INPUT_PULLUP);
   }
   SerialBT.begin("Jon Foenem");
-  prevClk = digitalRead(CLK_PIN);
-  pinMode(CLK_PIN, INPUT_PULLUP);
-  pinMode(DT_PIN, INPUT_PULLUP);
-  pinMode(ENC_SW, INPUT_PULLUP);
+
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  enc.attachHalfQuad(CLK_PIN, DT_PIN);
+  enc.setCount(0);
 }
 
 void loop() {
