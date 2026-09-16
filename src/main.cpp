@@ -9,8 +9,8 @@ constexpr int BUTTON_COUNT = 4;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
 String buttonStatus[BUTTON_COUNT] = {"", "", "", ""};
 
-int ledR = 21;
-int ledG = 22;
+int ledR = 4;
+int ledG = 5;
 
 int lastLedR = 0;
 int lastLedG = 0;
@@ -18,17 +18,36 @@ int lastLedG = 0;
 unsigned long timerLastMillis = 0;
 int timerInterval = 500;
 
-#define CW 0
-#define CCW 1
-
-int CLK_PIN = 21;
-int DT_PIN = 22;
-int ENC_SW = 23;
+int CLK_PIN = 27;
+int DT_PIN = 33;
+int ENC_SW = 32;
 
 int encCounter = 0;
-int direction = CW;
 int clk;
 int prevClk;
+
+enum LedStat {
+  RED,
+  AMBER,
+  AMBER_FLASH,
+  GREEN
+};
+
+void writeLeds(int status) {
+  switch (status) {
+    case RED:
+      digitalWrite(ledR, lastLedR);
+      return;
+    case AMBER:
+      return;
+    case AMBER_FLASH:
+      return;
+    case GREEN:
+      return;
+    default:
+      return;
+  }
+}
 
 bool isTimerTick(int interval) {
   if (millis() - timerLastMillis > interval) {
@@ -57,15 +76,14 @@ bool analogIntToBool(int val) {
   return false;
 }
 
-void blinkLeds(int interval) {
+void blinkLedMultiple(int interval) {
   if (isTimerTick(interval)) {
-    lastLedR = !boolToAnalogInt(analogIntToBool(lastLedR));
-    lastLedG = !boolToAnalogInt(analogIntToBool(lastLedG));
-    analogWrite(lastLedG, ledG);
-    analogWrite(lastLedR, ledR);
+    lastLedR = !lastLedR;
+    lastLedG = !lastLedG;
+    analogWrite(ledG, boolToAnalogInt(lastLedG));
+    analogWrite(ledR, boolToAnalogInt(lastLedR));
   }
 }
-
 void setColorStatus() {
   if (!SerialBT.isReady()) {
     analogWrite(ledG, 0);
@@ -73,7 +91,7 @@ void setColorStatus() {
     return;  // if bt isnt ready its cooked
   }
   if (!SerialBT.connected()) {
-    blinkLeds(500);
+    blinkLedMultiple(500);
     return;
   }
   if (SerialBT.connected()) {
@@ -84,14 +102,22 @@ void setColorStatus() {
 String computeRotary() {
   clk = digitalRead(CLK_PIN);
   if (clk != prevClk && clk == 1) {
-    encCounter--;
-    direction = CCW;
-  } else {
-    encCounter++;
-    direction = CW;
+    if (digitalRead(DT_PIN) != clk) {
+      encCounter--;
+    } else {
+      encCounter++;
+    }
   }
-  // TODO: modify to return structured string and probably only say how many
-  // turns it went every serial print and then reset it
+  prevClk = clk;
+  return String(encCounter);
+}
+
+String lastConcatString = "";
+
+String concatenateStrings() {
+  String out = "";
+  out = getActiveButtons() + computeRotary();
+  return out;
 }
 
 void setup() {
@@ -103,10 +129,18 @@ void setup() {
   }
   SerialBT.begin("Jon Foenem");
   prevClk = digitalRead(CLK_PIN);
+  pinMode(CLK_PIN, INPUT_PULLUP);
+  pinMode(DT_PIN, INPUT_PULLUP);
+  pinMode(ENC_SW, INPUT_PULLUP);
 }
 
 void loop() {
-  SerialBT.write((const uint8_t*)getActiveButtons().c_str(), 5);
+  String data = concatenateStrings();
+  if (data != lastConcatString)
+    SerialBT.write((const uint8_t*)data.c_str(), data.length());
+  lastConcatString = data;
+  Serial.println(data);
+
   setColorStatus();
-  delay(10);
+  delay(1);
 }

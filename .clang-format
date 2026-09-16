@@ -1,0 +1,15 @@
+---
+BasedOnStyle: Google
+Language: Cpp
+
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+ColumnLimit: 0
+
+AccessModifierOffset: 0
+
+BreakBeforeBraces: Attach
+AlwaysBreakAfterDefinitionReturnType: None
+..
