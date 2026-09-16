@@ -18,9 +18,9 @@ int lastLedG = 0;
 unsigned long timerLastMillis = 0;
 int timerInterval = 500;
 
-int CLK_PIN = 27;
-int DT_PIN = 33;
-int ENC_SW = 32;
+int CLK_PIN = 25;
+int DT_PIN = 26;
+int ENC_SW = 27;
 
 int encCounter = 0;
 int clk;
