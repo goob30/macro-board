@@ -28,6 +28,8 @@ int CLK_PIN = 25;
 int DT_PIN = 26;
 int ENC_SW = 27;
 
+int POT_PIN = 33;
+
 int encCounter = 0;
 int clk;
 int prevClk;
@@ -65,15 +67,6 @@ bool isTimerTick(int interval) {
   return false;
 }
 
-String getActiveButtons() {
-  String serialString;
-  for (int i = 0; i < 4; i++) {
-    buttonStatus[i] = String(!digitalRead(BUTTON_PINS[i]));
-    serialString += buttonStatus[i];
-  }
-  return serialString + "\n";
-}
-
 int boolToAnalogInt(bool val) {
   if (val == true) return 255;
   return 0;
@@ -107,11 +100,26 @@ void setColorStatus() {
   }
 }
 
+String getActiveButtons() {
+  String serialString;
+  for (int i = 0; i < 4; i++) {
+    buttonStatus[i] = String(!digitalRead(BUTTON_PINS[i]));
+    serialString += buttonStatus[i];
+  }
+  return serialString;
+}
+
+int getPotVal() {
+  int val;
+  val = analogRead(POT_PIN);
+  return val;
+}
+
 String lastConcatString = "";
 
 String concatenateStrings() {
   String out = "";
-  out = getActiveButtons() + String(count);
+  out = getActiveButtons() + String(count) + String(getPotVal()) + "\n";
   return out;
 }
 
@@ -127,6 +135,8 @@ void setup() {
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
   enc.attachHalfQuad(CLK_PIN, DT_PIN);
   enc.setCount(0);
+
+  pinMode(POT_PIN, INPUT);
 }
 
 void loop() {
