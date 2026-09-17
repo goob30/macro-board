@@ -34,8 +34,6 @@ int encCounter = 0;
 int clk;
 int prevClk;
 
-int64_t count = enc.getCount();
-
 enum LedStat {
   RED,
   AMBER,
@@ -115,12 +113,9 @@ int getPotVal() {
   return val;
 }
 
-String lastConcatString = "";
-
-String concatenateStrings() {
-  String out = "";
-  out = getActiveButtons() + String(count) + String(getPotVal()) + "\n";
-  return out;
+void loop() {
+  setColorStatus();
+  delay(10);
 }
 
 void setup() {
@@ -147,5 +142,5 @@ void loop() {
   Serial.println(data);
 
   setColorStatus();
-  delay(1);
+  delay(5);
 }
