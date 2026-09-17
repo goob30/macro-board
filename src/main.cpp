@@ -14,7 +14,6 @@ BluetoothSerial SerialBT;
 
 constexpr int BUTTON_COUNT = 4;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
-std::string buttonStatus[BUTTON_COUNT] = {"", "", "", ""};
 
 int ledR = 4;
 int ledG = 5;
@@ -102,7 +101,6 @@ void setColorStatus() {
 std::string getButtons() {
   std::string out = "";
   for (int i = 0; i < 4; i++) {
-    buttonStatus[i] = !digitalRead(BUTTON_PINS[i]) ? "1" : "0";
     out += !digitalRead(BUTTON_PINS[i]) ? '1' : '0';
   }
   return "B" + out;
