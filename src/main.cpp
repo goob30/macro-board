@@ -102,9 +102,8 @@ void setColorStatus() {
 std::string getButtons() {
   std::string out = "";
   for (int i = 0; i < 4; i++) {
-    bool pressed = !digitalRead(BUTTON_PINS[i]);
-    buttonStatus[i] = pressed ? "1" : "0";
-    out += pressed ? '1' : '0';
+    buttonStatus[i] = !digitalRead(BUTTON_PINS[i]) ? "1" : "0";
+    out += !digitalRead(BUTTON_PINS[i]) ? '1' : '0';
   }
   return "B" + out;
 }
