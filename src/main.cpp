@@ -124,7 +124,7 @@ void loop() {
   // if (data != lastConcatString && SerialBT.connected())
   //   SerialBT.write((const uint8_t*)data.c_str(), data.length());
   // lastConcatString = data;
-  Serial.println(data);
+  // Serial.println(data);
 
   setColorStatus();
   delay(10);
