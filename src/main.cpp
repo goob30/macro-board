@@ -98,24 +98,10 @@ void setColorStatus() {
   }
 }
 
-String getActiveButtons() {
-  String serialString;
-  for (int i = 0; i < 4; i++) {
-    buttonStatus[i] = String(!digitalRead(BUTTON_PINS[i]));
-    serialString += buttonStatus[i];
-  }
-  return serialString;
-}
-
 int getPotVal() {
   int val;
   val = analogRead(POT_PIN);
   return val;
-}
-
-void loop() {
-  setColorStatus();
-  delay(10);
 }
 
 void setup() {
@@ -135,12 +121,11 @@ void setup() {
 }
 
 void loop() {
-  String data = concatenateStrings();
-  if (data != lastConcatString)
-    SerialBT.write((const uint8_t*)data.c_str(), data.length());
-  lastConcatString = data;
+  // if (data != lastConcatString && SerialBT.connected())
+  //   SerialBT.write((const uint8_t*)data.c_str(), data.length());
+  // lastConcatString = data;
   Serial.println(data);
 
   setColorStatus();
-  delay(5);
+  delay(10);
 }
