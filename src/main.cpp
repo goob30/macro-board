@@ -3,6 +3,7 @@
 #include <ESP32Encoder.h>
 #include <stdio.h>
 #include <string.h>
+#include "led.h"
 // ts is functionslop
 
 // TODO
@@ -15,15 +16,6 @@ BluetoothSerial SerialBT;
 constexpr int BUTTON_COUNT = 4;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
 
-int ledR = 4;
-int ledG = 5;
-
-int lastLedR = 0;
-int lastLedG = 0;
-
-unsigned long timerLastMillis = 0;
-int timerInterval = 500;
-
 int CLK_PIN = 25;
 int DT_PIN = 26;
 int ENC_SW = 27;
@@ -34,69 +26,6 @@ int encCounter = 0;
 int clk;
 int prevClk;
 
-enum LedStat {
-  RED,
-  AMBER,
-  AMBER_FLASH,
-  GREEN
-};
-
-void writeLeds(int status) {
-  switch (status) {
-    case RED:
-      digitalWrite(ledR, lastLedR);
-      return;
-    case AMBER:
-      return;
-    case AMBER_FLASH:
-      return;
-    case GREEN:
-      return;
-    default:
-      return;
-  }
-}
-
-bool isTimerTick(int interval) {
-  if (millis() - timerLastMillis > interval) {
-    timerLastMillis = millis();
-    return true;
-  }
-  return false;
-}
-
-int boolToAnalogInt(bool val) {
-  if (val == true) return 255;
-  return 0;
-}
-
-bool analogIntToBool(int val) {
-  if (val > 127) return true;
-  return false;
-}
-
-void blinkLedMultiple(int interval) {
-  if (isTimerTick(interval)) {
-    lastLedR = !lastLedR;
-    lastLedG = !lastLedG;
-    analogWrite(ledG, boolToAnalogInt(lastLedG));
-    analogWrite(ledR, boolToAnalogInt(lastLedR));
-  }
-}
-void setColorStatus() {
-  if (!SerialBT.isReady()) {
-    analogWrite(ledG, 0);
-    analogWrite(ledR, 255);
-    return;  // if bt isnt ready its cooked
-  }
-  if (!SerialBT.connected()) {
-    blinkLedMultiple(500);
-    return;
-  }
-  if (SerialBT.connected()) {
-    analogWrite(ledR, boolToAnalogInt(true));
-  }
-}
 
 std::string getButtons() {
   std::string out = "";
@@ -144,6 +73,8 @@ void setup() {
   enc.setCount(0);
 
   pinMode(POT_PIN, INPUT);
+
+  analogReadResolution(8);
 }
 
 std::string data = "";
