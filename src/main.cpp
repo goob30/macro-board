@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <BluetoothSerial.h>
 #include <ESP32Encoder.h>
-
+#include <stdio.h>
+#include <string.h>
 // ts is functionslop
 
 // TODO
@@ -13,7 +14,7 @@ BluetoothSerial SerialBT;
 
 constexpr int BUTTON_COUNT = 4;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
-String buttonStatus[BUTTON_COUNT] = {"", "", "", ""};
+std::string buttonStatus[BUTTON_COUNT] = {"", "", "", ""};
 
 int ledR = 4;
 int ledG = 5;
@@ -98,11 +99,39 @@ void setColorStatus() {
   }
 }
 
-int getPotVal() {
-  int val;
-  val = analogRead(POT_PIN);
-  return val;
+std::string getButtons() {
+  std::string out = "";
+  for (int i = 0; i < 4; i++) {
+    bool pressed = !digitalRead(BUTTON_PINS[i]);
+    buttonStatus[i] = pressed ? "1" : "0";
+    out += pressed ? '1' : '0';
+  }
+  return "B" + out;
 }
+
+
+std::string getPotVal() {
+  char out[5];
+  snprintf(out, sizeof(out), "%04d", analogRead(POT_PIN));
+  return "P" + std::string(out);
+}
+
+int lastCount = 0;
+
+// TODO: decide between constant polling + deltas or update-based with abs values
+// int getEncoderDelta() {
+//   int delta = 0;
+//   if (enc.getCount() > lastCount) {
+//     delta = enc.getCount() - lastCount;
+//   }
+// }
+
+std::string getEncoder() {
+  return "E" + std::to_string(enc.getCount());
+}
+
+std::string lastConcatString = "";
+
 
 void setup() {
   // set led status to uninitialized
@@ -120,10 +149,14 @@ void setup() {
   pinMode(POT_PIN, INPUT);
 }
 
+std::string data = "";
+
 void loop() {
-  // if (data != lastConcatString && SerialBT.connected())
-  //   SerialBT.write((const uint8_t*)data.c_str(), data.length());
-  // lastConcatString = data;
+  data = "";
+  data += getButtons() + getPotVal() + getEncoder() + "\n";
+  if (data != lastConcatString && SerialBT.connected())
+    SerialBT.write((const uint8_t*)data.c_str(), data.length());
+  lastConcatString = data;
   // Serial.println(data);
 
   setColorStatus();
