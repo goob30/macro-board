@@ -1,12 +1,12 @@
 #pragma once
 
-int ledR = 4;
-int ledG = 5;
+extern int ledR;
+extern int ledG;
 
-int lastLedR = 0;
-int lastLedG = 0;
+extern int lastLedR;
+extern int lastLedG;
 
-unsigned long timerLastMillis = 0;
-int timerInterval = 500;
+extern unsigned long timerLastMillis;
+extern int timerInterval;
 
 void setColorStatus();

@@ -3,6 +3,7 @@
 #include <ESP32Encoder.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "led.h"
 // ts is functionslop
 
@@ -26,20 +27,15 @@ int encCounter = 0;
 int clk;
 int prevClk;
 
-
-std::string getButtons() {
-  std::string out = "";
-  for (int i = 0; i < 4; i++) {
-    out += !digitalRead(BUTTON_PINS[i]) ? '1' : '0';
+void getButtons(char* out) {
+  for (int i = 0; i < BUTTON_COUNT; i++) {
+    out[i] = !digitalRead(BUTTON_PINS[i]) ? '1' : '0';
   }
-  return "B" + out;
+  out[BUTTON_COUNT] = '\0';
 }
 
-
-std::string getPotVal() {
-  char out[5];
-  snprintf(out, sizeof(out), "%04d", analogRead(POT_PIN));
-  return "P" + std::string(out);
+void getPotVal(char* out) {
+  snprintf(out, 6, "P%04d", analogRead(POT_PIN));
 }
 
 int lastCount = 0;
@@ -52,12 +48,11 @@ int lastCount = 0;
 //   }
 // }
 
-std::string getEncoder() {
-  return "E" + std::to_string(enc.getCount());
+void getEncoder(char* out) {
+  snprintf(out, 16, "E%d", enc.getCount());
 }
 
 std::string lastConcatString = "";
-
 
 void setup() {
   // set led status to uninitialized
@@ -69,24 +64,38 @@ void setup() {
   SerialBT.begin("Jon Foenem");
 
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
-  enc.attachHalfQuad(CLK_PIN, DT_PIN);
+  enc.attachFullQuad(CLK_PIN, DT_PIN);
   enc.setCount(0);
+  enc.setFilter(1023);
 
   pinMode(POT_PIN, INPUT);
 
   analogReadResolution(8);
 }
 
-std::string data = "";
+char data[32];
+char lastData[32] = "";
+
+void updateAndSendSerialBT() {
+  char butt[5];
+  char pot[6];
+  char encoder[16];
+
+  getButtons(butt);
+  getPotVal(pot);
+  getEncoder(encoder);
+
+  snprintf(data, sizeof(data), "B%s%s%s\n", butt, pot, encoder);
+
+  if (strcmp(data, lastData) != 0) {
+    Serial.write((const uint8_t*)data, strlen(data));
+    strcpy(lastData, data);
+  }
+}
 
 void loop() {
-  data = "";
-  data += getButtons() + getPotVal() + getEncoder() + "\n";
-  if (data != lastConcatString && SerialBT.connected())
-    SerialBT.write((const uint8_t*)data.c_str(), data.length());
-  lastConcatString = data;
-  // Serial.println(data);
+  updateAndSendSerialBT();
 
   setColorStatus();
-  delay(10);
+  delay(30);
 }
