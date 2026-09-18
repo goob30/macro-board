@@ -17,11 +17,11 @@ BluetoothSerial SerialBT;
 constexpr int BUTTON_COUNT = 4;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
 
-int CLK_PIN = 25;
-int DT_PIN = 26;
-int ENC_SW = 27;
+int CLK_PIN = 33;
+int DT_PIN = 32;
+int ENC_SW = 35;
 
-int POT_PIN = 33;
+int POT_PIN = 34;
 
 int encCounter = 0;
 int clk;
@@ -49,9 +49,8 @@ int lastCount = 0;
 // }
 
 void getEncoder(char* out) {
-  snprintf(out, 16, "E%d", enc.getCount());
+  snprintf(out, 16, "E%d", (int)(enc.getCount() / 4));
 }
-
 std::string lastConcatString = "";
 
 void setup() {
@@ -64,10 +63,11 @@ void setup() {
   SerialBT.begin("Jon Foenem");
 
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  // setup()
+  pinMode(CLK_PIN, INPUT_PULLUP);
+  pinMode(DT_PIN, INPUT_PULLUP);
   enc.attachFullQuad(CLK_PIN, DT_PIN);
   enc.setCount(0);
-  enc.setFilter(1023);
-
   pinMode(POT_PIN, INPUT);
 
   analogReadResolution(8);
@@ -93,9 +93,12 @@ void updateAndSendSerialBT() {
   }
 }
 
-void loop() {
-  updateAndSendSerialBT();
+unsigned long lastSend = 0;
 
-  setColorStatus();
-  delay(30);
+void loop() {
+  if (millis() - lastSend >= 30) {
+    updateAndSendSerialBT();
+    setColorStatus();
+    lastSend = millis();
+  }
 }
