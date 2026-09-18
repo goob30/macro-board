@@ -14,8 +14,16 @@
 ESP32Encoder enc;
 BluetoothSerial SerialBT;
 
-constexpr int BUTTON_COUNT = 4;
+constexpr int BUTTON_COUNT = 12;
 int BUTTON_PINS[BUTTON_COUNT] = {16, 17, 18, 19};
+int MX_X[3] = {25, 26, 27};      // TODO
+int MX_Y[4] = {16, 17, 18, 19};  // TODO
+
+int posX = 0;
+int posY = 0;
+int btnIdx = 0;
+
+int scanX = 0;
 
 int CLK_PIN = 33;
 int DT_PIN = 32;
@@ -27,11 +35,16 @@ int encCounter = 0;
 int clk;
 int prevClk;
 
+// TODO: update for matrix where idx = y * 3 + x (y and x would be a set of matrix tx/rx active pins)
 void getButtons(char* out) {
-  for (int i = 0; i < BUTTON_COUNT; i++) {
-    out[i] = !digitalRead(BUTTON_PINS[i]) ? '1' : '0';
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(MX_X[i], i == scanX ? LOW : HIGH);
   }
-  out[BUTTON_COUNT] = '\0';
+  for (int y = 0; y < 4; y++) {
+    int idx = y * 3 + scanX;
+    out[idx] = !digitalRead(MX_Y[y]) ? '1' : '0';
+  }
+  scanX = (scanX + 1) % 3;
 }
 
 void getPotVal(char* out) {
