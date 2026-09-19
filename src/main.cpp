@@ -37,7 +37,7 @@ int prevClk;
 
 // TODO: update for matrix where idx = y * 3 + x (y and x would be a set of matrix tx/rx active pins)
 void getButtons(char* out) {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {  // write high to
     digitalWrite(MX_X[i], i == scanX ? LOW : HIGH);
   }
   for (int y = 0; y < 4; y++) {
@@ -50,16 +50,6 @@ void getButtons(char* out) {
 void getPotVal(char* out) {
   snprintf(out, 6, "P%04d", analogRead(POT_PIN));
 }
-
-int lastCount = 0;
-
-// TODO: decide between constant polling + deltas or update-based with abs values
-// int getEncoderDelta() {
-//   int delta = 0;
-//   if (enc.getCount() > lastCount) {
-//     delta = enc.getCount() - lastCount;
-//   }
-// }
 
 void getEncoder(char* out) {
   snprintf(out, 16, "E%d", (int)(enc.getCount() / 4));
