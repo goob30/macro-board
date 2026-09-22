@@ -106,7 +106,6 @@ unsigned long lastSend = 0;
 void loop() {
   if (millis() - lastSend >= 30) {
     updateAndSendSerialBT();
-    setColorStatus();
     lastSend = millis();
   }
 }
