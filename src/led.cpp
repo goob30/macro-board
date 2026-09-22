@@ -11,30 +11,38 @@ int lastLedG = 0;
 unsigned long timerLastMillis = 0;
 int timerInterval = 500;
 
-enum LedStat {
-  RED,
-  AMBER,
-  AMBER_FLASH,
-  GREEN
-};
-
 void writeLeds(int status) {
   switch (status) {
     case RED:
+      lastLedR = 255;
+      lastLedG = 0;
       digitalWrite(ledR, lastLedR);
+      digitalWrite(ledG, lastLedG);
       return;
     case AMBER:
-      return;
-    case AMBER_FLASH:
+      lastLedG = 255;
+      lastLedR = 255;
+      digitalWrite(ledR, lastLedR);
+      digitalWrite(ledG, lastLedG);
       return;
     case GREEN:
+      lastLedR = 0;
+      lastLedG = 255;
+      digitalWrite(ledR, lastLedR);
+      digitalWrite(ledG, lastLedG);
+      return;
+    case NONE:
+      lastLedR = 0;
+      lastLedG = 0;
+      digitalWrite(ledR, lastLedR);
+      digitalWrite(ledG, lastLedG);
       return;
     default:
       return;
   }
 }
 
-bool isTimerTick(int interval) {
+bool isTimerTimeout(int interval) {
   if (millis() - timerLastMillis > interval) {
     timerLastMillis = millis();
     return true;
@@ -53,7 +61,7 @@ bool analogIntToBool(int val) {
 }
 
 void blinkLedMultiple(int interval) {
-  if (isTimerTick(interval)) {
+  if (isTimerTimeout(interval)) {
     lastLedR = !lastLedR;
     lastLedG = !lastLedG;
     analogWrite(ledG, boolToAnalogInt(lastLedG));
@@ -61,5 +69,12 @@ void blinkLedMultiple(int interval) {
   }
 }
 
-void setColorStatus() {
+void setColorStatus(int status, bool isFlash) {
+  static bool lastWrite = false;
+  if (!isFlash) {
+    writeLeds(status);
+    return;
+  }
+  if (isTimerTimeout(500)) lastWrite = !lastWrite;
+  writeLeds((lastWrite ? NONE : status));
 }

@@ -9,4 +9,11 @@ extern int lastLedG;
 extern unsigned long timerLastMillis;
 extern int timerInterval;
 
-void setColorStatus();
+enum LedStat {
+  RED,
+  AMBER,
+  GREEN,
+  NONE
+};
+
+void setColorStatus(int color, bool isFlash);

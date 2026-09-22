@@ -56,8 +56,13 @@ void getEncoder(char* out) {
 }
 std::string lastConcatString = "";
 
+void getColorStatus() {
+  // 
+}
+
 void setup() {
   // set led status to uninitialized
+  setColorStatus(RED, false);
 
   Serial.begin(115200);
   for (int i = 0; i < 4; i++) {
