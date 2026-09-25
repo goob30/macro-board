@@ -56,13 +56,25 @@ void getEncoder(char* out) {
 }
 std::string lastConcatString = "";
 
+bool isSerialOk = false;
+
 void getColorStatus() {
-  // 
+  if (isSerialOk) {
+    setColorStatus(GREEN, false);
+    return;
+  }
+  setColorStatus(RED, false);
+  return;
+}
+
+void checkSerial() {
+  if (Serial.available() > 0 && Serial.readStringUntil('\n') == "PC_OK" && isSerialOk == false) {
+    isSerialOk = true;
+  }
 }
 
 void setup() {
-  // set led status to uninitialized
-  setColorStatus(RED, false);
+  getColorStatus();
 
   Serial.begin(115200);
   for (int i = 0; i < 4; i++) {
@@ -107,5 +119,6 @@ void loop() {
   if (millis() - lastSend >= 30) {
     updateAndSendSerialBT();
     lastSend = millis();
+    getColorStatus();
   }
 }
