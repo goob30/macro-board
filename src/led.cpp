@@ -14,28 +14,20 @@ int timerInterval = 500;
 void writeLeds(int status) {
   switch (status) {
     case RED:
-      lastLedR = 255;
-      lastLedG = 0;
-      digitalWrite(ledR, lastLedR);
-      digitalWrite(ledG, lastLedG);
+      digitalWrite(ledR, 255);
+      digitalWrite(ledG, 0);
       return;
     case AMBER:
-      lastLedG = 255;
-      lastLedR = 255;
-      digitalWrite(ledR, lastLedR);
-      digitalWrite(ledG, lastLedG);
+      digitalWrite(ledR, 255);
+      digitalWrite(ledG, 255);
       return;
     case GREEN:
-      lastLedR = 0;
-      lastLedG = 255;
-      digitalWrite(ledR, lastLedR);
-      digitalWrite(ledG, lastLedG);
+      digitalWrite(ledR, 0);
+      digitalWrite(ledG, 255);
       return;
     case NONE:
-      lastLedR = 0;
-      lastLedG = 0;
-      digitalWrite(ledR, lastLedR);
-      digitalWrite(ledG, lastLedG);
+      digitalWrite(ledR, 0);
+      digitalWrite(ledG, 0);
       return;
     default:
       return;
@@ -58,15 +50,6 @@ int boolToAnalogInt(bool val) {
 bool analogIntToBool(int val) {
   if (val > 127) return true;
   return false;
-}
-
-void blinkLedMultiple(int interval) {
-  if (isTimerTimeout(interval)) {
-    lastLedR = !lastLedR;
-    lastLedG = !lastLedG;
-    analogWrite(ledG, boolToAnalogInt(lastLedG));
-    analogWrite(ledR, boolToAnalogInt(lastLedR));
-  }
 }
 
 void setColorStatus(int status, bool isFlash) {
